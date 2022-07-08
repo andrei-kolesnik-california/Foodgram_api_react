@@ -1,86 +1,77 @@
-import random
-
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import viewsets
+from .serializers import CustomUserSerializerPassword, CustomUserSerializerRead, CustomUserSerializerWrite
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from .models import ADMIN, CustomUser
+from .mixins import ReadWriteSerializerMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from .permissions import IsAdmin
-from .serializers import CustomUserSerializer, CustomUserSerializerShort
-from .models import ADMIN
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.hashers import check_password
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from django.contrib.auth.hashers import make_password
 
 
 User = get_user_model()
 
 
-# @api_view(['POST'])
-# @permission_classes([permissions.AllowAny])
-# def signup(request):
-#     confirmation_code = str(random.randint(10000, 20000))
-#     serializer = CustomUserSerializerShort(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save(confirmation_code=confirmation_code)
-#         send_email_with_code(serializer.data['email'], confirmation_code)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-#     else:
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def get_token(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+    if email is None or password is None:
+        return Response('Data is invalid',
+                        status=status.HTTP_400_BAD_REQUEST)
+    user = get_object_or_404(User, email=email)
+    if check_password(password, user.password):
+        token = Token.objects.create(user=user)
+        print(token)
+        data = {
+            'auth_token': str(token),
+        }
+        return Response(data, status.HTTP_201_CREATED)
+    return Response('Data is invalid',
+                    status=status.HTTP_400_BAD_REQUEST)
 
 
-# @api_view(['POST'])
-# @permission_classes([permissions.AllowAny])
-# def token_obtain(request):
-#     username = request.data.get('username')
-#     code = request.data.get('confirmation_code')
-#     if username is None or code is None:
-#         return Response('Data is invalid',
-#                         status=status.HTTP_400_BAD_REQUEST)
-#     user = get_object_or_404(User, username=username)
-#     if username == user.username and code == user.confirmation_code:
-#         refresh_token = RefreshToken.for_user(user)
-#         data = {
-#             'token': str(refresh_token.access_token),
-#         }
-#         return Response(data)
-#     return Response('Data is invalid',
-#                     status=status.HTTP_400_BAD_REQUEST)
+class DeleteToken(APIView):
+    def post(self, request, format=None):
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+@api_view(['POST'])
+def change_password(request):
+    new_password = request.data.get('new_password')
+    current_password = request.data.get('current_password')
+    user = CustomUser.objects.get(username=request.user.username)
+    serializer = CustomUserSerializerPassword(
+        data={'password': new_password})
+    if check_password(current_password, user.password) and serializer.is_valid():
+        user.password = make_password(new_password)
+        user.save()
+        return Response('Password changed', status=status.HTTP_200_OK)
+    return Response('Please check current_password', status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
-    lookup_field = 'username'
+    read_serializer_class = CustomUserSerializerRead
+    write_serializer_class = CustomUserSerializerWrite
 
-    # def get_permissions(self):
+    def get_permissions(self):
 
-    #     if self.action in [
-    #         'list',
-    #         'create',
-    #         'retrieve',
-    #         'update',
-    #         'partial_update',
-    #         'destroy'
-    #     ]:
-    #         permission_classes = [IsAdmin]
-    #     else:
-    #         permission_classes = [permissions.IsAuthenticated]
-    #     return [permission() for permission in permission_classes]
+        if self.action == 'create':
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
-    # def retrieve_me(self, request):
-    #     user = request.user
-    #     serializer = self.get_serializer(user)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # def partial_update_me(self, request, pk=None):
-    #     user = request.user
-    #     serializer = self.get_serializer(
-    #         user, data=request.data, partial=True)
-    #     if serializer.is_valid():
-    #         if user.role != ADMIN:
-    #             serializer.save(role=user.role)
-    #         else:
-    #             serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def retrieve_me(self, request):
+        user = request.user
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

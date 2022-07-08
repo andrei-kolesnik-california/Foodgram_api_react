@@ -12,11 +12,11 @@ CHOICES = (
 
 
 class CustomAccountManager(BaseUserManager):
-    def create_user(self, username, email, password, role):
+    def create_user(self, username, email, password, first_name, last_name, role):
         user = self.model(username=username, email=email,
-                          password=password, role=role)
+                          password=password, first_name=first_name, last_name=last_name, role=role)
         user.is_superuser = False
-        # user.is_active = True
+        user.is_active = True
         user.save(using=self._db)
         return user
 
@@ -27,7 +27,7 @@ class CustomAccountManager(BaseUserManager):
         user.is_staff = True
         user.role = 'admin'
         user.is_superuser = True
-        # user.is_active = True
+        user.is_active = True
         user.save(using=self._db)
         return user
 
@@ -48,6 +48,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True, null=False)
+    is_subscribed = models.BooleanField(default=False)
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'
 
