@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework.authtoken',
     'users.apps.UsersConfig',
+    'recepies.apps.RecepiesConfig',
 ]
 
 MIDDLEWARE = [
