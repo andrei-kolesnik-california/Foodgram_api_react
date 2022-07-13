@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 from django.core.management.base import BaseCommand
-from recepies.models import Ingredient
+from recipes.models import Ingredient
 
 root = Path(__file__).parent.parent.parent.parent.parent.parent
 static_data_dir = Path(root, 'data')

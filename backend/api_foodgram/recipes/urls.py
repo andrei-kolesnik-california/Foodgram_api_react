@@ -1,11 +1,12 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import TagViewSet
+from .views import TagViewSet, IngredientViewSet
 
-app_name = 'recepies'
+app_name = 'recipes'
 
 router = DefaultRouter()
 router.register('tags', TagViewSet)
+router.register('ingredients', IngredientViewSet)
 
 urlpatterns = [
     # path('auth/token/login/', get_token, name='get_token'),
