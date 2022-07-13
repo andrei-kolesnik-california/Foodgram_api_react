@@ -8,8 +8,19 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ["id"]
-        verbose_name = "tag"
-        verbose_name_plural = "tags"
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    name = models.CharField(max_length=200)
+    measurement_unit = models.CharField(max_length=10)
+
+    class Meta:
+        ordering = ["id"]
+        # verbose_name = "ingredient"
+        # verbose_name_plural = "ingredients"
 
     def __str__(self):
         return self.name
