@@ -41,7 +41,7 @@ def get_token(request):
 class DeleteToken(APIView):
     def post(self, request, format=None):
         request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['POST'])
