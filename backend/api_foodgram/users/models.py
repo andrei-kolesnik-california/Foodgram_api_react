@@ -65,3 +65,24 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         ordering = ['username']
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(CustomUser,
+                             on_delete=models.CASCADE,
+                             related_name='follower',
+                             verbose_name='Подписчик')
+    following = models.ForeignKey(CustomUser,
+                                  on_delete=models.CASCADE,
+                                  related_name='following',
+                                  verbose_name='Автор')
+    subscription_date = models.DateField(auto_now_add=True,)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'following'],
+                                    name='unique_subscribers_and_authors'),
+        ]
+
+    def __str__(self):
+        return f'{self.user} follow for {self.following}'
