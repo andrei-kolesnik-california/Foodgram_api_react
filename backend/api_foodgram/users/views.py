@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from django.contrib.auth.hashers import make_password
-
+from rest_framework.decorators import action
 
 User = get_user_model()
 
@@ -38,24 +38,11 @@ def get_token(request):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteToken(APIView):
-    def post(self, request, format=None):
-        request.user.auth_token.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 @api_view(['POST'])
-def change_password(request):
-    new_password = request.data.get('new_password')
-    current_password = request.data.get('current_password')
-    user = CustomUser.objects.get(username=request.user.username)
-    serializer = CustomUserSerializerPassword(
-        data={'password': new_password})
-    if check_password(current_password, user.password) and serializer.is_valid():
-        user.password = make_password(new_password)
-        user.save()
-        return Response('Password changed', status=status.HTTP_200_OK)
-    return Response('Please check current_password', status=status.HTTP_400_BAD_REQUEST)
+@permission_classes([permissions.AllowAny])
+def delete_token(request):
+    request.user.auth_token.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
@@ -71,7 +58,27 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    def retrieve_me(self, request):
+    @action(
+        detail=False,
+        methods=['GET'],
+    )
+    def me(self, request):
         user = request.user
         serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=['POST'],
+    )
+    def set_password(self, request):
+        new_password = request.data.get('new_password')
+        current_password = request.data.get('current_password')
+        user = CustomUser.objects.get(username=request.user.username)
+        serializer = CustomUserSerializerPassword(
+            data={'password': new_password})
+        if check_password(current_password, user.password) and serializer.is_valid():
+            user.password = make_password(new_password)
+            user.save()
+            return Response('Password had been changed', status=status.HTTP_200_OK)
+        return Response('Please check the field current_password', status=status.HTTP_400_BAD_REQUEST)
