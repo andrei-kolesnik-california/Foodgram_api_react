@@ -7,11 +7,18 @@ from django.shortcuts import get_object_or_404
 
 
 class CustomUserSerializerRead(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CustomUser
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', "is_subscribed",)
+
+    def get_is_subscribed(self, following):
+        return Follow.objects.filter(
+            user=self.context.get('request').user,
+            following=following
+        ).exists()
 
 
 class CustomUserSerializerWrite(serializers.ModelSerializer):

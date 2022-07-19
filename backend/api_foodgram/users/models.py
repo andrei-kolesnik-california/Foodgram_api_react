@@ -48,7 +48,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True, null=False)
-    is_subscribed = models.BooleanField(default=False)
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'
 
