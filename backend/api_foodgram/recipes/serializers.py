@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-from users.serializers import CustomUserSerializerRead
+from users.serializers import FoodgramUserSerializerRead
 from .models import Tag, Ingredient, Recipe, IngredientInRecipe, Favorite, Purchase
 
 User = get_user_model()
@@ -35,7 +35,7 @@ class IngredientInRecipeGetSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(read_only=True, many=True,)
-    author = CustomUserSerializerRead(read_only=True)
+    author = FoodgramUserSerializerRead(read_only=True)
     ingredients = IngredientInRecipeGetSerializer(many=True,
                                                   read_only=True,
                                                   source='ingredient_amount')
@@ -63,7 +63,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                                        recipe=request_obj.id).exists()
 
     def validate(self, data):
-        # author = self.context.get('request').user
+        author = self.context.get('request').user
         ingredients = self.initial_data.get('ingredients')
         tags = self.initial_data.get('tags')
 
@@ -81,7 +81,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 )
         data['ingredients'] = ingredients
         data['tags'] = tags
-        # data['author'] = author
+        data['author'] = author
         return data
 
     @staticmethod

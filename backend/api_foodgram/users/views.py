@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets
-from .serializers import CustomUserSerializerPassword, CustomUserSerializerRead, CustomUserSerializerWrite, FollowSerializerList, FollowSerializer
+from .serializers import FoodgramUserSerializerPassword, FoodgramUserSerializerRead, FoodgramUserSerializerWrite, FollowSerializerList, FollowSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from .models import ADMIN, CustomUser, Follow
+from .models import ADMIN, FoodgramUser, Follow
 from .mixins import ReadWriteSerializerMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
@@ -37,7 +37,6 @@ def get_token(request):
     user = get_object_or_404(User, email=email)
     if check_password(password, user.password):
         token = Token.objects.create(user=user)
-        print(token)
         data = {
             'auth_token': str(token),
         }
@@ -55,8 +54,8 @@ def delete_token(request):
 
 class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
-    read_serializer_class = CustomUserSerializerRead
-    write_serializer_class = CustomUserSerializerWrite
+    read_serializer_class = FoodgramUserSerializerRead
+    write_serializer_class = FoodgramUserSerializerWrite
 
     def get_permissions(self):
 
@@ -82,8 +81,8 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
     def set_password(self, request):
         new_password = request.data.get('new_password')
         current_password = request.data.get('current_password')
-        user = CustomUser.objects.get(username=request.user.username)
-        serializer = CustomUserSerializerPassword(
+        user = FoodgramUser.objects.get(username=request.user.username)
+        serializer = FoodgramUserSerializerPassword(
             data={'password': new_password})
         if check_password(current_password, user.password) and serializer.is_valid():
             user.password = make_password(new_password)
@@ -96,7 +95,7 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
         methods=['GET'],
     )
     def subscriptions(self, request, pk=None):
-        queryset = self.paginate_queryset(CustomUser.objects.filter(
+        queryset = self.paginate_queryset(FoodgramUser.objects.filter(
             following__user=request.user))
         serializer = FollowSerializerList(
             queryset, many=True, context={
@@ -113,7 +112,7 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
         if request.method == 'DELETE':
             subscription = get_object_or_404(
                 Follow,
-                following=get_object_or_404(CustomUser, id=pk),
+                following=get_object_or_404(FoodgramUser, id=pk),
                 user=request.user
             )
             self.perform_destroy(subscription)
@@ -121,7 +120,7 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
         serializer = FollowSerializer(
             data={
                 'user': request.user.id,
-                'following': get_object_or_404(CustomUser, id=pk).id
+                'following': get_object_or_404(FoodgramUser, id=pk).id
             },
             context={'request': request}
         )

@@ -8,7 +8,7 @@ from rest_framework import status
 from django.http import HttpResponse
 from rest_framework.response import Response
 from django.db.models import Sum
-from users.permissions import IsAdmin, IsAuthorOrReadOnly
+from users.permissions import IsAuthorOrReadOnly
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
@@ -39,9 +39,16 @@ class RecipeViewSet(ModelViewSet):
     filterset_fields = ('tags', )
 
     def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
+        if self.action in [
+            'list',
+            'retrieve',
+        ]:
             permission_classes = [permissions.AllowAny]
-        elif self.action == 'destroy' or self.action == 'update' or self.action == 'partial_update':
+        elif self.action in [
+            'update',
+            'partial_update',
+            'destroy'
+        ]:
             permission_classes = [IsAuthorOrReadOnly]
         else:
             permission_classes = [permissions.IsAuthenticated]
@@ -50,11 +57,8 @@ class RecipeViewSet(ModelViewSet):
     @staticmethod
     def post_or_delete(request, model, serializer, pk):
         if request.method != 'POST':
-            get_object_or_404(
-                model,
-                user=request.user,
-                recipe=get_object_or_404(Recipe, id=pk)
-            ).delete()
+            model.objects.filter(
+                user=request.user, recipe=Recipe.objects.get(id=pk)).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         serializer = serializer(
             data={'user': request.user.id, 'recipe': pk},

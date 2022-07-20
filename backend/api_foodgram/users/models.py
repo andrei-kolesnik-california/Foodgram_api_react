@@ -35,7 +35,7 @@ class CustomAccountManager(BaseUserManager):
         return self.get(username=username_)
 
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
+class FoodgramUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(
         max_length=254, null=False, blank=False, unique=True)
@@ -67,11 +67,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Follow(models.Model):
-    user = models.ForeignKey(CustomUser,
+    user = models.ForeignKey(FoodgramUser,
                              on_delete=models.CASCADE,
                              related_name='follower',
                              verbose_name='Подписчик')
-    following = models.ForeignKey(CustomUser,
+    following = models.ForeignKey(FoodgramUser,
                                   on_delete=models.CASCADE,
                                   related_name='following',
                                   verbose_name='Автор')

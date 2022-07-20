@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import CustomUser, Follow
+from .models import FoodgramUser, Follow
 
 
 class CustomUserAdmin(UserAdmin):
@@ -14,6 +14,6 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('username', 'email')
 
 
-admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(FoodgramUser, CustomUserAdmin)
 
 admin.site.register(Follow)

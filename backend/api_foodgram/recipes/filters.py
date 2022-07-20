@@ -9,27 +9,27 @@ from .models import Recipe
 User = get_user_model()
 
 
+filter_choices = {
+    'is_favorited': 'favorite_recipe',
+    'is_in_shopping_cart': 'purchases',
+}
+
+
 class IngredientSearchFilter(SearchFilter):
     search_param = 'name'
 
 
 class RecipeFilter(FilterSet):
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
-    is_favorited = filters.BooleanFilter(method='get_is_favorited')
+    is_favorited = filters.BooleanFilter(method='get_boolean')
     is_in_shopping_cart = filters.BooleanFilter(
-        method='get_is_in_shopping_cart'
+        method='get_boolean'
     )
 
-    def get_is_favorited(self, queryset, name, value):
+    def get_boolean(self, queryset, name, value):
         user = self.request.user
         if value and user.is_authenticated:
-            return queryset.filter(favorite_recipe__user=user)
-        return queryset
-
-    def get_is_in_shopping_cart(self, queryset, name, value):
-        user = self.request.user
-        if value and user.is_authenticated:
-            return queryset.filter(purchases__user=user)
+            return queryset.filter(**{f'{filter_choices[name]}__user': self.request.user})
         return queryset
 
     class Meta:

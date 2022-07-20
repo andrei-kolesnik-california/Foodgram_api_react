@@ -122,7 +122,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # AUTH
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.FoodgramUser'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

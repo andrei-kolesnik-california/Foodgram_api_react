@@ -1,16 +1,16 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import CustomUser, Follow
+from .models import FoodgramUser, Follow
 from recipes.models import Recipe
 from rest_framework.validators import UniqueTogetherValidator
 from django.shortcuts import get_object_or_404
 
 
-class CustomUserSerializerRead(serializers.ModelSerializer):
+class FoodgramUserSerializerRead(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = CustomUser
+        model = FoodgramUser
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', "is_subscribed",)
 
@@ -24,22 +24,22 @@ class CustomUserSerializerRead(serializers.ModelSerializer):
         ).exists()
 
 
-class CustomUserSerializerWrite(serializers.ModelSerializer):
+class FoodgramUserSerializerWrite(serializers.ModelSerializer):
 
     class Meta:
-        model = CustomUser
+        model = FoodgramUser
         fields = ('email', 'username', 'first_name',
                   'last_name', "password")
 
         validators = [
             UniqueTogetherValidator(
-                queryset=CustomUser.objects.all(),
+                queryset=FoodgramUser.objects.all(),
                 fields=('email', 'username', )
             )
         ]
 
     def create(self, validated_data):
-        user = CustomUser(
+        user = FoodgramUser(
             email=validated_data['email'],
             username=validated_data['username'],
             first_name=validated_data['first_name'],
@@ -52,10 +52,10 @@ class CustomUserSerializerWrite(serializers.ModelSerializer):
         return user
 
 
-class CustomUserSerializerPassword(serializers.ModelSerializer):
+class FoodgramUserSerializerPassword(serializers.ModelSerializer):
 
     class Meta:
-        model = CustomUser
+        model = FoodgramUser
         fields = ('password',)
 
 
@@ -66,7 +66,7 @@ class FollowSerializerList(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = CustomUser
+        model = FoodgramUser
         fields = (
             'email', 'id', 'username', 'first_name', 'last_name',
             'is_subscribed', 'recipes', 'recipes_count'
@@ -103,7 +103,7 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = ('user', 'following')
 
     def validate(self, data):
-        get_object_or_404(CustomUser, username=data['following'])
+        get_object_or_404(FoodgramUser, username=data['following'])
         if self.context['request'].user == data['following']:
             raise serializers.ValidationError(
                 'You can not subscribe by yourself')
