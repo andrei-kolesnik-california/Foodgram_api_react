@@ -4,7 +4,7 @@ from .serializers import FoodgramUserSerializerPassword, FoodgramUserSerializerR
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from .models import ADMIN, FoodgramUser, Follow
+from .models import ADMIN, User, Follow
 from .mixins import ReadWriteSerializerMixin
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
@@ -81,7 +81,7 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
     def set_password(self, request):
         new_password = request.data.get('new_password')
         current_password = request.data.get('current_password')
-        user = FoodgramUser.objects.get(username=request.user.username)
+        user = User.objects.get(username=request.user.username)
         serializer = FoodgramUserSerializerPassword(
             data={'password': new_password})
         if check_password(current_password, user.password) and serializer.is_valid():
@@ -95,7 +95,7 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
         methods=['GET'],
     )
     def subscriptions(self, request, pk=None):
-        queryset = self.paginate_queryset(FoodgramUser.objects.filter(
+        queryset = self.paginate_queryset(User.objects.filter(
             following__user=request.user))
         serializer = FollowSerializerList(
             queryset, many=True, context={
@@ -112,7 +112,7 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
         if request.method == 'DELETE':
             subscription = get_object_or_404(
                 Follow,
-                following=get_object_or_404(FoodgramUser, id=pk),
+                following=get_object_or_404(User, id=pk),
                 user=request.user
             )
             self.perform_destroy(subscription)
@@ -120,7 +120,7 @@ class UserViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
         serializer = FollowSerializer(
             data={
                 'user': request.user.id,
-                'following': get_object_or_404(FoodgramUser, id=pk).id
+                'following': get_object_or_404(User, id=pk).id
             },
             context={'request': request}
         )
