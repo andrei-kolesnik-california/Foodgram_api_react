@@ -1,18 +1,9 @@
 FROM python:3.7-slim
-
-# Создать директорию вашего приложения.
-workdir /django
-
-# Скопировать с локального компьютера файл зависимостей
-# в директорию /app.
+WORKDIR /app
 COPY requirements.txt .
+RUN pip install --upgrade pip && pip3 install -r requirements.txt --no-cache-dir
+COPY api_foodgram .
 
-# Выполнить установку зависимостей внутри контейнера.
-RUN pip3 install -r requirements.txt --no-cache-dir
-
-# Скопировать содержимое директории /api_yamdb c локального компьютера
-# в директорию /app.
-COPY . .
-
-# Выполнить запуск сервера разработки при старте контейнера.
-# CMD ["gunicorn", "api_foodgram.wsgi:application", "--bind", "0:8000" ]
+LABEL author='Andrei Kolesnik' version=1 broken_keyboards=3
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["run"]

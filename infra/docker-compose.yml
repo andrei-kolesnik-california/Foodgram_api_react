@@ -1,39 +1,48 @@
 version: '3.3'
 services:
-
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file:
+      - ./.env
+  backend:
+    image: andreykolesnik/api_foodgram:v2
+    restart: always
+    volumes:
+      - backend_static:/app/backend_static/
+      - media:/app/media/
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+  web-migrate-import-collectstatic:
+    image: andreykolesnik/api_foodgram:v2
+    depends_on:
+      - backend
+    env_file:
+      - ./.env
+    command:
+      - migrate-import-collectstatic
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: andreykolesnik/frontend_foodgram:v1
     volumes:
       - ../frontend/:/app/result_build/
-  # web:
-  #   build:
-  #     context: ../backend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8000:8000"
-  #   command: /bin/sh -c 'cd api_foodgram/; gunicorn api_foodgram.wsgi:application --bind 0:8000'
-  #   restart: always
-  #   volumes:
-  #     # Контейнер web будет работать с данными, хранящиеся в томе static_value, 
-  #     # через свою директорию /app/static/
-  #     - static_value:/django/static/
-  #     # Данные, хранящиеся в томе media_value, будут доступны в контейнере web 
-  #     # через директорию /app/media/
-  #     - media_value:/django/media/
+    depends_on:
+      - backend
   nginx:
-    image: nginx:1.19.3
+    image: nginx:1.21.3-alpine
     ports:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
+      - backend_static:/app/backend_static/
+      - media:/app/media/
     depends_on:
-      # - web
       - frontend
-
-# volumes:
-#   static_value:
-#   media_value:
+volumes:
+  db:
+  backend_static:
+  media:
