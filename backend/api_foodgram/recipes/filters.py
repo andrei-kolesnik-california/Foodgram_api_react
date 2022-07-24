@@ -8,10 +8,14 @@ from .models import Recipe
 
 User = get_user_model()
 
+latin_to_cyrillic = str.maketrans(
+    'qwertyuiop[]asdfghjkl;\'zxcvbnm,./',
+    'йцукенгшщзхъфывапролджэячсмитьбю.'
+)
 
 filter_choices = {
     'is_favorited': 'favorite_recipe',
-    'is_in_shopping_cart': 'purchases',
+    'is_in_shopping_cart': 'purchase',
 }
 
 

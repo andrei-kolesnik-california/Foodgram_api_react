@@ -7,7 +7,7 @@ services:
     env_file:
       - ./.env
   backend:
-    image: andreykolesnik/api_foodgram:v2
+    image: andreykolesnik/api_foodgram:v4
     restart: always
     volumes:
       - backend_static:/app/backend_static/

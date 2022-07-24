@@ -1,31 +1,19 @@
 import os
+from decouple import Csv, config
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
+SECRET_KEY = config('SECRET_KEY', default='string_from_.env')
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '*9&!xh*$!6**7ivvew5c-(9u$plb6k)j4__+o8hdy%tn8$a8u1'
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    '84.201.163.20',
-    'foodgram.gotdns.ch'
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    '127.0.0.1',
-    'localhost',
-    '84.201.163.20',
-    'foodgram.gotdns.ch'
-]
-
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost, http://127.0.0.1',
+    cast=Csv()
+)
 # Application definition
 
 INSTALLED_APPS = [
@@ -77,23 +65,32 @@ WSGI_APPLICATION = 'api_foodgram.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', default='postgres'),
-        'USER': os.getenv('POSTGRES_USER', default='postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
-        'HOST': os.getenv('DB_HOST', default='db'),
-        'PORT': os.getenv('DB_PORT', default='5432')
+if DEBUG == False:
+    DATABASES = {
+        'default': {
+            'ENGINE': config(
+                'DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': config(
+                'DB_NAME', default='postgres'),
+            'USER': config(
+                'POSTGRES_USER', default='postgres'),
+            'PASSWORD': config(
+                'POSTGRES_PASSWORD', default='password'),
+            'HOST': config(
+                'DB_HOST', default='db'),
+            'PORT': config(
+                'DB_PORT', default=5432, cast=int)
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -132,9 +129,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/backend_static/'
-# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'backend_static/'),)
-STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static')
-
+if DEBUG == True:
+    STATICFILES_DIRS = (os.path.join(BASE_DIR, 'backend_static/'),)
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static/')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -145,7 +143,6 @@ AUTH_USER_MODEL = 'users.User'
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-        # 'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',

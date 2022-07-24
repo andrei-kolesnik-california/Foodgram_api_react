@@ -12,8 +12,9 @@ from users.permissions import IsAuthorOrReadOnly
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from .filters import IngredientSearchFilter, RecipeFilter
+from .filters import IngredientSearchFilter, RecipeFilter, latin_to_cyrillic
 from django_filters.rest_framework.backends import DjangoFilterBackend
+from urllib.parse import unquote
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -29,6 +30,20 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     permission_classes = (permissions.AllowAny,)
     filter_backends = (IngredientSearchFilter,)
     pagination_class = None
+
+    def get_queryset(self):
+        name = self.request.query_params.get('name')
+        queryset = self.queryset
+        if name:
+            name = name.translate(latin_to_cyrillic)
+            name = name.lower()
+            queryset_startwith = list(queryset.filter(name__startswith=name))
+            queryset_contains = queryset.filter(name__contains=name)
+            queryset_startwith.extend(
+                [i for i in queryset_contains if i not in queryset_startwith]
+            )
+            queryset = queryset_startwith
+        return queryset
 
 
 class RecipeViewSet(ModelViewSet):

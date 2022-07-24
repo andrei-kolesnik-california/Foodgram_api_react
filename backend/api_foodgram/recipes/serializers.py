@@ -66,7 +66,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         author = self.context.get('request').user
         ingredients = self.initial_data.get('ingredients')
         tags = self.initial_data.get('tags')
-
+        cooking_time = self.initial_data.get('cooking_time')
         for ingredient in ingredients:
             amount = ingredient.get('amount')
             try:
@@ -77,8 +77,12 @@ class RecipeSerializer(serializers.ModelSerializer):
                 )
             if int(amount) < 1:
                 raise serializers.ValidationError(
-                    'Please input a number not less than one'
+                    'Ingredient amount must be not less than one'
                 )
+        if int(cooking_time) < 1:
+            raise serializers.ValidationError(
+                'Cooking time must be not less than one minute'
+            )
         data['ingredients'] = ingredients
         data['tags'] = tags
         data['author'] = author
