@@ -1,5 +1,5 @@
 <a id = "anchor"></a>
-# Foodgram - онлайн сервис для публикации кулинарных рецептов.
+# Foodgram - online service for publishing culinary recipes.
 
 [![Python](https://img.shields.io/badge/-Python-464646?style=flat-square&logo=Python)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/-Django-464646?style=flat-square&logo=Django)](https://www.djangoproject.com/)
@@ -10,43 +10,58 @@
 [![docker](https://img.shields.io/badge/-Docker-464646?style=flat-square&logo=docker)](https://www.docker.com/)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat-square&logo=Yandex.Cloud)](https://cloud.yandex.ru/)  
 http://foodgram.gotdns.ch/
-### Описание
+### Description
 
-Приложение создано для публикации рецептов с описанием их приготовления и сортировкой по тегам. Для авторизованных пользователей открывается функционал создания рецептов, подписки на других авторов, добавления рецептов к числу понравившихся и в список покупок. Все авторизованные пользователи сайта могут распечатать список необходимых ингредиентов для приготовления в формате pdf.   
+🍳 **Foodgram** is a vibrant, full-stack recipe sharing platform that brings food lovers together! Built with modern web technologies, this application allows users to discover, create, and share delicious culinary recipes with the world.
 
-### Запуск проекта 
-клонируйте репозиторий 
+**✨ Key Features:**
+- **Recipe Publishing**: Share your favorite recipes with detailed cooking instructions and beautiful photos
+- **Smart Tagging System**: Organize and discover recipes by categories, cuisines, and dietary preferences
+- **Social Features**: Follow your favorite chefs, like recipes, and build your culinary community
+- **Shopping Lists**: Automatically generate shopping lists from your saved recipes
+- **PDF Export**: Print ingredient lists and cooking instructions for offline use
+- **Responsive Design**: Enjoy the platform on any device - desktop, tablet, or mobile
+
+**🔐 User Experience:**
+- **Public Access**: Browse and search recipes without registration
+- **Authenticated Users**: Create recipes, follow authors, build favorites, and manage shopping lists
+- **Seamless Workflow**: From recipe discovery to grocery shopping, everything is connected
+
+Perfect for food bloggers, home cooks, and anyone passionate about cooking and sharing culinary experiences!   
+
+### Project Launch 
+clone the repository 
 ```
 git clone git@github.com:andrey-kolesnik-moscow/foodgram-project-react.git
 ```
-подключитесь к своему серверу через ssh
+connect to your server via ssh
 ```
 ssh <username>@<server IP>
 ```
-установите Docker
+install Docker
 ```
 sudo apt install docker.io
 ```
-установите docker-compose для Linux
+install docker-compose for Linux
 ```
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 ```
-сделайте разрешения для docker-compose
+set permissions for docker-compose
 ```
 sudo chmod +x /usr/local/bin/docker-compose
 ```
-добавьте ip вашего сервера в файл .env
+add your server IP to the .env file
 ```
 ALLOWED_HOSTS='localhost, 127.0.0.1, <server ip>'
 CSRF_TRUSTED_ORIGINS='http://localhost, http://127.0.0.1, http://<server ip>'
 ``` 
-скопируйте файлы на сервер из папки infra
+copy files to the server from the infra folder
 ```
 scp infra/* <username>@<server IP>:/home/<server user>/<your folder>/
 ```
-запустите сборку docker-compose
+start docker-compose build
 ```
 sudo docker-compose up -d
 ```
 
-[В начало страницы](#anchor)
+[Back to top](#anchor)
