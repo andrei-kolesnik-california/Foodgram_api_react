@@ -1,4 +1,4 @@
-<a id = "anchor"></a>
+<a id="anchor"></a>
 # Foodgram - online service for publishing culinary recipes.
 
 [![Python](https://img.shields.io/badge/-Python-464646?style=flat-square&logo=Python)](https://www.python.org/)
@@ -32,7 +32,7 @@ Perfect for food bloggers, home cooks, and anyone passionate about cooking and s
 ### Project Launch 
 clone the repository 
 ```
-git clone git@github.com:andrey-kolesnik-moscow/foodgram-project-react.git
+git clone git@github.com:andrei-kolesnik-california/foodgram-project-react.git
 ```
 connect to your server via ssh
 ```
